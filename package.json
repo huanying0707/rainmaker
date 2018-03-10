@@ -1,0 +1,29 @@
+{
+  "name": "byteball-devnet",
+  "version": "1.0.0",
+  "description": "Devnet for Byteball",
+  "main": "index.js",
+  "dependencies": {
+    "byteball-devnet-hub": "file:hub",
+    "byteball-devnet-witness": "file:witness"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "init": "bin/init.sh",
+    "genesis": "npm --prefix witness run genesis",
+    "blackbytes": "npm --prefix witness run blackbytes",
+    "witness": "npm --prefix witness start",
+    "hub": "npm --prefix hub start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pmiklos/byteball-devnet.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pmiklos/byteball-devnet/issues"
+  },
+  "homepage": "https://github.com/pmiklos/byteball-devnet#readme"
+}
