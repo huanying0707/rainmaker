@@ -113,4 +113,4 @@ The witness runs a DAG explorer as well which is exposed on port 8080 and so can
 For some reason the stable units are lagging behind by two units. So in order to make the first stable payment using the command above, 3 payment has to be sent.
 
 ## Dev network
-Reference byteball-development-environments chapter
+Reference development-network-environments chapter
