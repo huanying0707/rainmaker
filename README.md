@@ -1,18 +1,116 @@
-# byteball-development-environments
-built byteball development environment ，the project inspired by https://github.com/eaglo/byteball-genesis and https://github.com/pmiklos/byteball-devnet 
+# Bsure Development Environments
+This project part of initial code come from pmiklos/byteball-devnet, This project provides a lightweight disposable Bsure node  that can be used on demand for developement. It generates a new DAG from scratch with a simplified protocol for your own use. Benefits of using the devnode compared to testnet are:
+* no wait times for sychronizing the network to the latest state
+* minimal storage requirement since you don't have to download the whole testnet dag which is already several gigabytes
+* you can create as many devnet DAGs you want, for example one for each project
+* you can use it for integration testing
+* very fast, configurable confirmation times
 
-## 1.setup witeness and hub
-setup witeness & hub.
+Of course using the testnet has its benefits as well since that is accessible to anyone and so perfect for beta-testing.
 
-## 2.get  witness_info 
-run `readwitenessinfo.js` to get witness_info and generate config json file `"bgenesis.json"`
+The devnet protocol is simplified to a single witness which runs multiple serives:
+* exposes a JSON-RPC wallet endpoint for easy coin distribution
+* exposes a DAG explorer to visualise and browse the network
+* timestamp oracle for time-bound smart contracts
 
-## 3.run generate script 
-run `"bgenesis.js"`, and get the genesis_unit address.
+## Creating the devnode
+Start with installing the dependencies:
+```
+$ npm install
+```
 
-## 4.test and improve
+Initialize devnode configuration and network protocol:
+```
+$ npm run init
+```
 
-the script not be tested sufficient， so if you find any bugs ， report me pls!
+Create the geneis unit (when it asks for password, press enter):
+```
+$ npm run genesis
+```
 
-contact me ： `max@outman.com`   
- 
+Define blackbytes asset (when it asks for password, press enter):
+```
+$ npm run blackbytes
+```
+
+Start the hub
+```
+$ npm run hub
+```
+
+Start the witness (when it asks for password, press enter):
+```
+$ npm run witness
+```
+
+## Connecting to the devnode
+
+A devnode wallet must use the same byteball protocol as the witness in order to work. The recommended way to set up devnet is to use the [byteball-devnet-config](../../../byteball-devnet-config). Alternatively, you can copy the `config/constants.js` to the `node_modules/byteballcore/` overwriting the existing constants.js:
+
+```
+$ cp config/constants.js node_modules/byteballcore/constants.js
+```
+
+The devnode virtual hub runs on port 6611 to which wallets can connect to by setting the following parameters in the conf.js of the wallet:
+
+```
+exports.WS_PROTOCOL = 'ws://';
+exports.hub = 'localhost:6611';
+```
+
+## Distributing bytes and blackbytes
+
+The witness exposes a simplified JSON RPC endpoint on port 6612 that can be used to send bytes and blackbytes to any wallets.
+
+In order to send blackbytes, the receiving wallet has to be paired with the witness first. The pairing code by default is `AtbXPcYt2i4PwNAuf9awIYWx3aGZQb2DlUBc8wm1UhTl@localhost:6611#0000`. Note that before transferring blackbytes the blackbytes asset definition has to become stable. Since the timestamp oracle posts every minute, it becomes stable in about two minutes. Alternatively sending two byte transactions from the witness wallet also confirms the blackbytes definition.
+
+### RPC sendtoaddress
+Parameters:
+* `{String} address`- receving wallet address
+* `{Integer} amount` - amount in bytes
+
+Example:
+```
+$ curl --data '{"jsonrpc":"2.0", "id":1, "method":"sendtoaddress", "params":["7AAUNXYL3G5RB73TKQPCPGC6FL5RM2G6", 12345678] }' http://127.0.0.1:6612
+```
+
+### RPC sendblackbytestoaddress
+Parameters:
+* `{String} device`- the address of the receving device
+* `{String} address`- receving wallet address
+* `{Integer} amount` - amount in bytes
+
+Example:
+```
+$ curl --data '{"jsonrpc":"2.0", "id":1, "method":"sendblackbytestoaddress", "params": ["0BN2NOKBEBZNQPKSVUZZBWAM4NF5JLQCT", "ILVKZNLAL3OEUXX4QBNDNFNRVLBZTTXO", 35000] }' http://127.0.0.1:6612
+```
+
+## Using with docker
+
+Building the devnode docker image:
+
+```
+$ docker build -t byteball-devnet:latest .
+```
+
+Running the devnode:
+
+```
+$ docker run -it -p 6611:6611 -p 6612:6612 -p 8080:8080 byteball-devnet
+```
+
+## Timestamp Oracle
+
+The witness also acts as a timestamp oracle posting every minute by default. The Oracle's address is the same as the witness' address which is by default `ZQFHJXFWT2OCEBXF26GFXJU4MPASWPJT`. The timestamping interval can be controlled by the TIMESTAMPING_INTERVAL configuration parameter either in `conf.js` or in `~/.config/byteball-devnet-witness/conf.json`.
+
+## DAG Explorer
+
+The witness runs a DAG explorer as well which is exposed on port 8080 and so can be access at [http://localhost:8080](http://localhost:8080).
+
+## Known issues
+
+For some reason the stable units are lagging behind by two units. So in order to make the first stable payment using the command above, 3 payment has to be sent.
+
+## Dev network
+Reference byteball-development-environments chapter
